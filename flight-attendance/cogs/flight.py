@@ -1,6 +1,10 @@
 import discord
 from discord.ext import commands
 
+def parse_flight(depart_loc, arrive_loc, depart_time, arrive_time, flight_num):
+    pass
+
+
 class Flight(commands.Cog):
 
     def __init__(self, client):
