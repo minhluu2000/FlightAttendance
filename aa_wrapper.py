@@ -1,9 +1,5 @@
 # Insert code here
-# Things I can get from AA API:
-#   - date
-#   - origin
-
-# What to get: fnumber, departure, destination, dep_time, arriv_time, dep_date, arriv_date
+# THE DESTINATION MUST ALWAYS BE FROM DALLAS TO CHICAGO
 
 import requests
 import json
@@ -15,7 +11,8 @@ class AA_Wrapper:
         Dallas = "DFW",
         Tokyo = "NRT",
         LA = "LAX",
-        Houston = "IAH"
+        Houston = "IAH",
+        Chicago = "ORD"
     )
     __response = ""
     data = ""
@@ -30,6 +27,7 @@ class AA_Wrapper:
     @classmethod
     def process_request(cls):
         cls.data = json.loads(cls.__response)[:3]
+        print(cls.data)
         clean_data = []
         for element in cls.data:
             clean_data.append(dict(
@@ -41,3 +39,9 @@ class AA_Wrapper:
                 arrivalTime = element["arrivalTime"]
             ))
         return clean_data
+
+
+# if __name__ == "__main__":
+#     aa = AA_Wrapper
+#     aa.user_request(date="2222-12-22", origin="Dallas", destination="Chicago")
+#     aa.process_request()
