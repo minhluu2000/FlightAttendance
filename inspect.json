@@ -1,0 +1,8 @@
+[
+    {"flightNumber": "1452", "origin": "Dallas-Fort Worth", "destination": "Chicago", "duration": "2h 11m", "departureTime": "2020-01-26T02: 35: 00.000-06: 00", "arrivalTime": "2020-01-26T04: 46: 00.000-06: 00"
+    },
+    {"flightNumber": "4140", "origin": "Dallas-Fort Worth", "destination": "Chicago", "duration": "2h 18m", "departureTime": "2020-01-26T04: 08: 00.000-06: 00", "arrivalTime": "2020-01-26T06: 26: 00.000-06: 00"
+    },
+    {"flightNumber": "5570", "origin": "Dallas-Fort Worth", "destination": "Chicago", "duration": "2h 3m", "departureTime": "2020-01-26T05: 16: 00.000-06: 00", "arrivalTime": "2020-01-26T07: 19: 00.000-06: 00"
+    }
+]
