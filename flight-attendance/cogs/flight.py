@@ -45,9 +45,6 @@ class AA_Wrapper:
 
 
 def parse_flight(date, destination, origin):
-    '''
-
-    '''
     if date.lower() in ('tonight', 'today'): #origin= Dallas, Destination = Chicago
         date = None
 
@@ -63,10 +60,11 @@ class Flight(commands.Cog):
     
     @staticmethod
     def make_embed(n, flightNumber, duration, origin, departureTime, destination, arrivalTime):
-        embed = discord.Embed(title=f"Flight {n}", colour=discord.Colour(0xbe90b9))
+        embed = discord.Embed(title=f"Flight {n}", colour=discord.Colour(16777214))
 
-        embed.add_field(name="Flight No", value=f"{flightNumber}", inline=False)
-        embed.add_field(name="Duration", value=f"{duration}", inline=False)
+        embed.add_field(name="Flight No", value=f"{flightNumber}", inline=True)
+        embed.add_field(name="Duration", value=f"{duration}", inline=True)
+        embed.add_field(name='\u200b', value='\u200b', inline=False)
         embed.add_field(name="Depart", value=f"{origin}\n{departureTime}", inline=True)
         embed.add_field(name="Arrive", value=f"{destination}\n{arrivalTime}", inline=True)
 
@@ -74,22 +72,25 @@ class Flight(commands.Cog):
 
     @staticmethod
     def final_choice(flightNumber, duration, origin, departureTime, destination, arrivalTime):
-        embed = discord.Embed(colour=discord.Colour(0xbe90b9), description=f"Economy Class\nAirbus A320\nFlight Time:{duration} ")
+        embed = discord.Embed(colour=discord.Colour(16777214), description=f"Economy Class\nAirbus A320\nFlight Time:{duration} ")
 
         embed.set_image(url="https://media.discordapp.net/attachments/670703730697699362/670866843887599646/qr-code_4.png")
         embed.set_thumbnail(url="https://i.pinimg.com/originals/9f/92/b9/9f92b92b83bf3426b37b7b0e45ab2d94.png")
 
-        embed.add_field(name="Duration", value=f"{duration}", inline=False)
-        embed.add_field(name="Flight No.", value=f"{flightNumber}", inline=False)
+        embed.add_field(name="Duration", value=f"{duration}", inline=True)
+        embed.add_field(name="Flight No.", value=f"{flightNumber}", inline=True)
+        embed.add_field(name='\u200b', value='\u200b', inline=False)
         embed.add_field(name="Departure", value=f"{origin}", inline=True)
         embed.add_field(name="Departure Time", value=f"{departureTime}", inline=True)
-        embed.add_field(name="Arrival", value=f"{destination}", inline=False)
+        embed.add_field(name='\u200b', value='\u200b', inline=False)
+        embed.add_field(name="Arrival", value=f"{destination}", inline=True)
         embed.add_field(name="Arrival Time", value=f"{arrivalTime}", inline=True)
 
         return embed
     
     @commands.command()
     async def flight(self, ctx, *args):
+        flight_info = [] # [date, destination, origin]
         if not args:
             def check(m): return m.author == ctx.message.author
             def check_flight(m):
@@ -97,42 +98,48 @@ class Flight(commands.Cog):
                     return int(m.content) in range(1,4)
                 else:
                     return False
+            
 
-            flight_info = [] # [date, destination, origin]
-            flight_info = ['today', 'Chicago', 'Dallas']
             dialog = (
                 f"When would you like to fly {ctx.message.author.mention}?",
                 "Sounds great! Where would you like to fly?",
                 "Alrighty! Where would you like to depart from?")
             
             
-            # for msg in dialog:
-            #     await ctx.send(msg)
-            #     response = await self.client.wait_for('message', check=check)
-            #     flight_info.append(response.content.title())
-            # else:
+            for msg in dialog: # Interrogate user
+                await ctx.send(msg)
+                response = await self.client.wait_for('message', check=check)
+                flight_info.append(response.content.title())
+            else: # show results
+                flight_results = parse_flight(*flight_info) # date, destination, origin
+                for n,flight_result in enumerate(flight_results, start=1):
+                    card = Flight.make_embed(n,**flight_result)
+                    await ctx.send(embed=card)
+                else: # Get their final opinion
+                    await ctx.send("Which flight would you like?")
+                    flight_option = await self.client.wait_for('message', check=lambda m: int(m.content) in range(1,4) if m.content.isdigit() else False)
+                    await ctx.trigger_typing()
+                    flight_card = Flight.final_choice(**flight_results[int(flight_option.content)-1])
+                    await ctx.send(embed=flight_card)
 
-            #     flight_results = parse_flight(*flight_info)
-            #     await ctx.send(flight_results)
+        else: # shorthand usage
+            if (args[0].lower() != 'from') and (args[2].lower() != 'to'): # Show syntax if used incorrectly
+                await ctx.send('Usage: .flight from `location` to `location`')
 
-            flight_results = parse_flight(*flight_info)
-            for n,flight_result in enumerate(flight_results, start=1):
-                card = Flight.make_embed(n,**flight_result)
-                await ctx.send(embed=card)
-            else:
-                await ctx.send("Which flight would you like?")
-                flight_option = await self.client.wait_for('message', check=check_flight)
-                flight_card = Flight.final_choice(**flight_results[int(flight_option.content)-1])
-                await ctx.send(embed=flight_card)
-            
-        else:
-            if (args[0].lower() != 'from') and (args[2].lower() != 'to'):
-                await ctx.send('Usage: .flight from {location} to {location}')
-            else:
-                depart, arrive = args[1], ' '.join(args[3:])
-                async with ctx.typing():
-                    await sleep(2)
-                    await ctx.send(f"Depart: {depart.title()}\nArrive: {arrive.upper() if len(arrive) == 2 else arrive.title()}")
+            else: # parse flight preference
+                flight_info = (args[4] if len(args) == 5 else 'Today',args[3],args[1])
+                flight_results = parse_flight(*flight_info) # date, destination, origin
+                for n,flight_result in enumerate(flight_results, start=1):
+                    card = Flight.make_embed(n,**flight_result)
+                    await ctx.send(embed=card)
+                else:
+                    await ctx.send("Which flight would you like?")
+                    flight_option = await self.client.wait_for('message', check=lambda m: int(m.content) in range(1,4) if m.content.isdigit() else False)
+                    await ctx.trigger_typing()
+                    flight_card = Flight.final_choice(**flight_results[int(flight_option.content)-1])
+                    await ctx.send(embed=flight_card)
+
+        await ctx.send("Thank you for choosing American Airlines!")
 
 
 def setup(client):
