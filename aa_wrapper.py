@@ -19,7 +19,7 @@ class AA_Wrapper:
 
     @classmethod
     def user_request(cls, **kwargs):
-        date = kwargs["date"] if "date" in kwargs else f"{dt.now().strftime('%Y')}-{dt.now().strftime('%m')}-{dt.now().strftime('%d')}"
+        date = kwargs["date"] if "date" in kwargs else f"{dt.now().strftime('%Y-%m-%d')}"
         origin = kwargs["origin"] if "origin" in kwargs else ""
         destination = kwargs["destination"] if "destination" in kwargs else "" 
         cls.__response = requests.get(f"https://flightattendance.herokuapp.com/flights?date={date}&origin={cls.PLACE_ABR.get(origin,'')}&destination={cls.PLACE_ABR.get(destination,'')}").text
